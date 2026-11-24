@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="200억 알림계산기" />
+  <title>200억 투자법 · 토스증권 목표가 알림 계산기</title>
+  <style>
+    :root {
+      --bg: #f2f4f6;
+      --card: #ffffff;
+      --text: #191f28;
+      --sub: #6b7684;
+      --line: #e5e8eb;
+      --blue: #3182f6;
+      --blue-bg: #e8f3ff;
+      --red: #f04452;
+      --red-bg: #ffeeef;
+      --green: #00a870;
+      --green-bg: #e6f7f1;
+      --amber: #f59e0b;
+      --amber-bg: #fef3c7;
+      --radius: 16px;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+      padding-bottom: 56px;
+    }
+    .wrap {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 16px 14px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    header p {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: var(--sub);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      background: var(--blue-bg);
+      color: var(--blue);
+      white-space: nowrap;
+    }
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 8px;
+    }
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin: 0;
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .kpi {
+      background: #f9fafb;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+    .kpi-label {
+      font-size: 11px;
+      color: var(--sub);
+      font-weight: 600;
+    }
+    .kpi-val {
+      font-size: 15px;
+      font-weight: 800;
+      margin-top: 3px;
+      letter-spacing: -0.02em;
+    }
+    .kpi-sub {
+      font-size: 11px;
+      color: var(--sub);
+      margin-top: 2px;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--sub);
+      margin-bottom: 5px;
+    }
+    input[type="number"], input[type="text"], select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d1d6db;
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: inherit;
+      background: #fff;
+      color: var(--text);
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(49,130,246,0.12);
+    }
+    .toggle-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .pill-btn {
+      border: 1px solid #d1d6db;
+      background: #fff;
+      color: var(--sub);
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .pill-btn.active {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+    .btn {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-primary { background: var(--blue); color: #fff; }
+    .btn-light { background: #f2f4f6; color: var(--text); }
+    .btn-danger { background: var(--red-bg); color: var(--red); }
+    .btn-sm { padding: 6px 10px; font-size: 12px; border-radius: 8px; }
+    .tabs {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      margin-bottom: 12px;
+    }
+    .tab {
+      border: 1px solid var(--line);
+      background: #f9fafb;
+      color: var(--sub);
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .tab.active {
+      background: var(--text);
+      border-color: var(--text);
+      color: #fff;
+    }
+    .stock-list-row {
+      display: grid;
+      grid-template-columns: 1.4fr 0.8fr 1.2fr auto;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .stock-list-row:last-child { border-bottom: none; }
+    .stock-meta {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      background: #f9fafb;
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px;
+      font-size: 13px;
+    }
+    .stock-meta strong { display: block; font-size: 15px; margin-top: 2px; }
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      padding: 10px 6px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+    }
+    th {
+      font-size: 11px;
+      color: var(--sub);
+      font-weight: 700;
+      background: #f9fafb;
+      white-space: nowrap;
+    }
+    tr.row-buy td:first-child { border-left: 3px solid var(--blue); }
+    tr.row-sell td:first-child { border-left: 3px solid var(--red); }
+    tr.row-hold td:first-child { border-left: 3px solid #cbd5e1; }
+    tr.row-done { opacity: 0.52; background: #fafafa; }
+    .tag {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .tag-buy { background: var(--blue-bg); color: var(--blue); }
+    .tag-sell { background: var(--red-bg); color: var(--red); }
+    .tag-hold { background: #f2f4f6; color: var(--sub); }
+    .price-btn {
+      background: none;
+      border: 1px dashed #cbd5e1;
+      border-radius: 7px;
+      padding: 4px 8px;
+      font-weight: 800;
+      font-size: 13px;
+      color: var(--text);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .price-btn:active { background: var(--blue-bg); border-color: var(--blue); }
+    .chk-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--blue);
+      cursor: pointer;
+    }
+    .notice {
+      font-size: 12px;
+      color: var(--sub);
+      background: #f9fafb;
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-top: 10px;
+    }
+    .warn {
+      font-size: 12px;
+      color: #92400e;
+      background: var(--amber-bg);
+      border-radius: 10px;
+      padding: 9px 12px;
+      margin-top: 8px;
+      display: none;
+    }
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #191f28;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      z-index: 999;
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; }
+    .backup-box { margin-top: 10px; display: none; }
+    details summary {
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--sub);
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    @media (max-width: 560px) {
+      .kpi-grid { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .stock-list-row { grid-template-columns: 1fr 74px 1fr auto; gap: 6px; }
+      th, td { padding: 8px 4px; font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>200억 투자법 · 알림 계산기</h1>
+      <p>토스증권 목표가 알림 등록용 · 남은 잔량 매도 기준</p>
+    </div>
+    <span class="badge" id="ruleBadge">초기 65% · 평단 기준</span>
+  </header>
+
+  <!-- 요약 KPI -->
+  <section class="card">
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-label">총 투자금</div>
+        <div class="kpi-val" id="kpiTotal">6,000,000원</div>
+        <div class="kpi-sub" id="kpiWeightSum">비중 합계 100%</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">초기 진입 합계</div>
+        <div class="kpi-val" id="kpiInit">3,900,000원</div>
+        <div class="kpi-sub" id="kpiInitPct">전체의 65%</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">추가매수 예비 현금</div>
+        <div class="kpi-val" id="kpiReserve">2,100,000원</div>
+        <div class="kpi-sub" id="kpiReservePct">−15%(10%) + −25%(25%)</div>
+      </div>
+    </div>
+    <div class="warn" id="ratioWarn">
+      예비 현금 비율이 35%(−15% 10% + −25% 25%)보다 적습니다. 추가 매수 시 자금이 부족할 수 있습니다.
+    </div>
+  </section>
+
+  <!-- 자금 & 규칙 설정 -->
+  <section class="card">
+    <details open>
+      <summary>
+        <span>1. 자금 및 규칙 설정</span>
+        <span style="font-size:12px;color:var(--blue)">접기/펼치기</span>
+      </summary>
+      <div class="form-grid" style="margin-top:12px;">
+        <div class="field">
+          <label for="totalBudget">총 투자금 (원)</label>
+          <input type="number" id="totalBudget" step="100000" min="0" />
+        </div>
+        <div class="field">
+          <label for="initRatio">초기 진입 비율 (% · 기본 65%)</label>
+          <input type="number" id="initRatio" min="10" max="100" step="5" />
+        </div>
+      </div>
+      <div class="toggle-row">
+        <button class="pill-btn" id="btnBaseAvg" onclick="setPriceBase('avg')">물타기 후 평균 매수가 기준</button>
+        <button class="pill-btn" id="btnBaseInit" onclick="setPriceBase('init')">최초 매수가 기준</button>
+        <button class="pill-btn" id="btnTaxToggle" onclick="toggleTax()">국내 매도세 0.20% 반영: ON</button>
+      </div>
+    </details>
+  </section>
+
+  <!-- 종목 관리 -->
+  <section class="card">
+    <div class="card-head">
+      <h2 class="card-title">2. 종목 및 최초 매수가 입력</h2>
+      <button class="btn btn-light btn-sm" onclick="addStock()">+ 종목 추가</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1.4fr 0.8fr 1.2fr auto;gap:8px;font-size:11px;color:var(--sub);font-weight:700;padding-bottom:6px;border-bottom:1px solid var(--line);">
+      <span>종목명</span>
+      <span>비중(%)</span>
+      <span>최초 매수가(원)</span>
+      <span>삭제</span>
+    </div>
+    <div id="stockRows"></div>
+    <div class="notice">
+      최초 매수가를 입력하면 아래 표에 토스증권 목표가 알림용 가격과 매수·매도 금액이 자동 계산됩니다. (입력값은 이 기기 브라우저에 자동 저장)
+    </div>
+  </section>
+
+  <!-- 종목별 알림표 -->
+  <section class="card">
+    <div class="card-head">
+      <h2 class="card-title">3. 토스증권 목표가 알림표</h2>
+      <button class="btn btn-primary btn-sm" onclick="copyAlerts()">알림 목록 복사</button>
+    </div>
+
+    <div class="tabs" id="stockTabs"></div>
+    <div class="stock-meta" id="stockMeta"></div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>구간</th>
+            <th>목표가(탭 복사)</th>
+            <th>매매 금액 · 주수</th>
+            <th style="text-align:center;">알림 등록</th>
+            <th style="text-align:center;">체결 완료</th>
+          </tr>
+        </thead>
+        <tbody id="alertBody"></tbody>
+      </table>
+    </div>
+
+    <div class="notice" id="tableNote">
+      <strong>사용 팁:</strong> 목표가 버튼을 누르면 숫자만 복사됩니다. 토스증권 앱 → 해당 종목 → 상단 종(알림) 아이콘 → 목표가 알림에 붙여넣고 <strong>알림 등록</strong>을 체크해 두세요. 실제로 체결되면 <strong>체결 완료</strong>를 체크하면 평균 매수가와 남은 잔량이 자동 반영됩니다(각 구간 1회 실행).
+    </div>
+  </section>
+
+  <!-- 기록 백업 / 복원 -->
+  <section class="card">
+    <details>
+      <summary>
+        <span>4. 기록 백업 · 복원 · 초기화</span>
+        <span style="font-size:12px;color:var(--sub)">열기</span>
+      </summary>
+      <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;">
+        <button class="btn btn-light btn-sm" onclick="exportData()">내 기록 복사하기</button>
+        <button class="btn btn-light btn-sm" onclick="toggleImport()">기록 가져오기</button>
+        <button class="btn btn-danger btn-sm" onclick="resetAll()">전체 초기화</button>
+      </div>
+      <div class="backup-box" id="importBox">
+        <textarea id="importText" rows="4" placeholder="복사해 둔 백업 텍스트를 여기에 붙여넣으세요"></textarea>
+        <div style="margin-top:8px;display:flex;gap:8px;">
+          <button class="btn btn-primary btn-sm" onclick="importData()">붙여넣은 기록 적용</button>
+          <button class="btn btn-light btn-sm" onclick="toggleImport()">닫기</button>
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <p style="font-size:11px;color:var(--sub);text-align:center;margin:14px 4px 0;">
+    ※ 본 계산기는 개인 매매 규칙 정리와 목표가 계산을 돕기 위한 참고 도구이며, 최종 투자 결정과 책임은 투자자 본인에게 있습니다.
+  </p>
+</div>
+
+<div class="toast" id="toast">복사되었습니다</div>
+
+<script>
+  const STORAGE_KEY = 'invest200_toss_calc_v1';
+
+  const STEPS = [
+    { id: 'buy25', type: 'buy', pct: -25, label: '−25% 추매', ratio: 0.25, desc: '총배정의 25% 매수' },
+    { id: 'buy15', type: 'buy', pct: -15, label: '−15% 추매', ratio: 0.10, desc: '총배정의 10% 매수' },
+    { id: 'hold_dn', type: 'hold', pct: -5, label: '−5% 관망', ratio: 0, desc: '아무것도 안 함' },
+    { id: 'hold_up', type: 'hold', pct: 10, label: '+5–15% 보유', ratio: 0, desc: '그냥 보유' },
+    { id: 'sell25', type: 'sell', pct: 25, label: '+25% 매도', ratio: 0.10, desc: '잔량의 10% 매도' },
+    { id: 'sell35', type: 'sell', pct: 35, label: '+35% 매도', ratio: 0.20, desc: '잔량의 20% 매도' },
+    { id: 'sell45', type: 'sell', pct: 45, label: '+45% 매도', ratio: 0.30, desc: '잔량의 30% 매도' },
+    { id: 'sell60', type: 'sell', pct: 60, label: '+60% 매도', ratio: 0.40, desc: '잔량의 40% 매도' },
+    { id: 'sell100', type: 'sell', pct: 100, label: '+100% 전량', ratio: 1.00, desc: '남은 잔량 전량 매도' }
+  ];
+
+  function defaultState() {
+    return {
+      totalBudget: 6000000,
+      initRatio: 65,
+      priceBase: 'avg', // 'avg' or 'init'
+      includeTax: true,
+      selectedId: 's1',
+      stocks: [
+        { id: 's1', name: '삼성전자', weight: 50, entryPrice: '', alerts: {}, executed: {} },
+        { id: 's2', name: 'SK하이닉스', weight: 50, entryPrice: '', alerts: {}, executed: {} }
+      ]
+    };
+  }
+
+  let state = loadState();
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return defaultState();
+      const parsed = JSON.parse(raw);
+      if (!parsed.stocks || !Array.isArray(parsed.stocks) || parsed.stocks.length === 0) return defaultState();
+      return Object.assign(defaultState(), parsed);
+    } catch (e) {
+      return defaultState();
+    }
+  }
+
+  function saveState() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  function fmt(n) {
+    if (!isFinite(n) || n === 0) return '0';
+    return Math.round(n).toLocaleString('ko-KR');
+  }
+
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
+  }
+
+  function copyText(text, msg) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).catch(() => {});
+    }
+    showToast(msg || '복사되었습니다');
+  }
+
+  function setPriceBase(mode) {
+    state.priceBase = mode;
+    saveState();
+    render();
+  }
+
+  function toggleTax() {
+    state.includeTax = !state.includeTax;
+    saveState();
+    render();
+  }
+
+  function addStock() {
+    const id = 's' + Date.now();
+    state.stocks.push({ id, name: '새 종목', weight: 0, entryPrice: '', alerts: {}, executed: {} });
+    state.selectedId = id;
+    saveState();
+    render();
+  }
+
+  function removeStock(id) {
+    if (state.stocks.length <= 1) {
+      showToast('최소 1개 종목은 남겨두어야 합니다');
+      return;
+    }
+    state.stocks = state.stocks.filter(s => s.id !== id);
+    if (state.selectedId === id) state.selectedId = state.stocks[0].id;
+    saveState();
+    render();
+  }
+
+  function updateStockField(id, field, val) {
+    const s = state.stocks.find(x => x.id === id);
+    if (!s) return;
+    if (field === 'weight') s.weight = Math.max(0, parseFloat(val) || 0);
+    else if (field === 'entryPrice') s.entryPrice = val === '' ? '' : Math.max(0, parseFloat(val) || 0);
+    else s[field] = val;
+    saveState();
+    renderSummaryAndTable();
+  }
+
+  function toggleAlert(stockId, stepId) {
+    const s = state.stocks.find(x => x.id === stockId);
+    if (!s) return;
+    s.alerts[stepId] = !s.alerts[stepId];
+    saveState();
+    renderSummaryAndTable();
+  }
+
+  function toggleExecuted(stockId, stepId) {
+    const s = state.stocks.find(x => x.id === stockId);
+    if (!s) return;
+    s.executed[stepId] = !s.executed[stepId];
+    saveState();
+    renderSummaryAndTable();
+  }
+
+  function selectTab(id) {
+    state.selectedId = id;
+    saveState();
+    renderSummaryAndTable();
+  }
+
+  function calcStockState(stock) {
+    const alloc = (state.totalBudget || 0) * ((stock.weight || 0) / 100);
+    const initPct = (state.initRatio || 65) / 100;
+    const initAmt = alloc * initPct;
+    const reserveAmt = alloc - initAmt;
+    const entry = parseFloat(stock.entryPrice) || 0;
+
+    let totalCost = entry > 0 ? initAmt : 0;
+    let totalShares = entry > 0 ? initAmt / entry : 0;
+    let spentCash = entry > 0 ? initAmt : 0;
+
+    // 매수 단계 계산 (최초 매수가 기준)
+    const buy15Price = entry > 0 ? Math.round(entry * 0.85) : 0;
+    const buy25Price = entry > 0 ? Math.round(entry * 0.75) : 0;
+    const buy15Amt = alloc * 0.10;
+    const buy25Amt = alloc * 0.25;
+
+    if (entry > 0 && stock.executed.buy15 && buy15Price > 0) {
+      totalCost += buy15Amt;
+      totalShares += buy15Amt / buy15Price;
+      spentCash += buy15Amt;
+    }
+    if (entry > 0 && stock.executed.buy25 && buy25Price > 0) {
+      totalCost += buy25Amt;
+      totalShares += buy25Amt / buy25Price;
+      spentCash += buy25Amt;
+    }
+
+    const avgPrice = totalShares > 0 ? totalCost / totalShares : entry;
+    const sellBasePrice = state.priceBase === 'avg' ? avgPrice : entry;
+
+    // 남은 잔량 기준 매도 시뮬레이션
+    let remShares = totalShares;
+    let realizedGross = 0;
+    let realizedNet = 0;
+    let realizedCost = 0;
+    const taxRate = state.includeTax ? 0.002 : 0;
+
+    const stepCalc = {};
+
+    STEPS.forEach(st => {
+      if (st.type === 'buy') {
+        const p = entry > 0 ? Math.round(entry * (1 + st.pct / 100)) : 0;
+        const amt = alloc * st.ratio;
+        const sh = p > 0 ? amt / p : 0;
+        stepCalc[st.id] = { price: p, amt, shares: sh, done: !!stock.executed[st.id] };
+      } else if (st.type === 'hold') {
+        const p = entry > 0 ? Math.round((st.id === 'hold_dn' ? entry : sellBasePrice) * (1 + st.pct / 100)) : 0;
+        stepCalc[st.id] = { price: p, amt: 0, shares: 0, done: false };
+      } else if (st.type === 'sell') {
+        const p = sellBasePrice > 0 ? Math.round(sellBasePrice * (1 + st.pct / 100)) : 0;
+        const sellShares = remShares * st.ratio;
+        const gross = sellShares * p;
+        const net = gross * (1 - taxRate);
+        const done = !!stock.executed[st.id];
+        stepCalc[st.id] = { price: p, amt: net, shares: sellShares, done };
+        if (done && remShares > 0) {
+          realizedGross += gross;
+          realizedNet += net;
+          realizedCost += sellShares * avgPrice;
+          remShares = Math.max(0, remShares - sellShares);
+        }
+      }
+    });
+
+    // 미체결 매도 단계의 예상 수량도 순차 잔량 기준으로 계산해 표시
+    let projShares = totalShares;
+    STEPS.filter(st => st.type === 'sell').forEach(st => {
+      const sc = stepCalc[st.id];
+      const sh = projShares * st.ratio;
+      const net = sh * sc.price * (1 - taxRate);
+      sc.shares = sh;
+      sc.amt = net;
+      projShares = Math.max(0, projShares - sh);
+    });
+
+    return {
+      alloc, initAmt, reserveAmt, entry, avgPrice, sellBasePrice,
+      totalShares, remShares, spentCash,
+      realizedProfit: realizedNet - realizedCost,
+      stepCalc
+    };
+  }
+
+  function render() {
+    document.getElementById('totalBudget').value = state.totalBudget;
+    document.getElementById('initRatio').value = state.initRatio;
+
+    const rowsEl = document.getElementById('stockRows');
+    rowsEl.innerHTML = '';
+    state.stocks.forEach(s => {
+      const div = document.createElement('div');
+      div.className = 'stock-list-row';
+      div.innerHTML = `
+        <input type="text" value="${escapeHtml(s.name)}" placeholder="종목명" oninput="updateStockField('${s.id}','name',this.value)" />
+        <input type="number" value="${s.weight}" min="0" max="100" step="5" oninput="updateStockField('${s.id}','weight',this.value)" />
+        <input type="number" value="${s.entryPrice}" placeholder="매수가 입력" step="100" min="0" oninput="updateStockField('${s.id}','entryPrice',this.value)" />
+        <button class="btn btn-danger btn-sm" onclick="removeStock('${s.id}')">×</button>
+      `;
+      rowsEl.appendChild(div);
+    });
+
+    renderSummaryAndTable();
+  }
+
+  function renderSummaryAndTable() {
+    const budget = state.totalBudget || 0;
+    const initPct = Math.min(100, Math.max(0, state.initRatio || 65));
+    const reservePct = 100 - initPct;
+    const weightSum = state.stocks.reduce((a, b) => a + (b.weight || 0), 0);
+
+    document.getElementById('kpiTotal').textContent = fmt(budget) + '원';
+    document.getElementById('kpiWeightSum').textContent = '종목 비중 합계 ' + weightSum + '%' + (weightSum !== 100 ? ' (100% 권장)' : '');
+    document.getElementById('kpiInit').textContent = fmt(budget * initPct / 100) + '원';
+    document.getElementById('kpiInitPct').textContent = '전체의 ' + initPct + '%';
+    document.getElementById('kpiReserve').textContent = fmt(budget * reservePct / 100) + '원';
+    document.getElementById('kpiReservePct').textContent = '전체의 ' + reservePct + '% (필요 35%)';
+    document.getElementById('ratioWarn').style.display = reservePct < 35 ? 'block' : 'none';
+
+    document.getElementById('ruleBadge').textContent = `초기 ${initPct}% · ${state.priceBase === 'avg' ? '평단' : '최초가'} 기준`;
+    document.getElementById('btnBaseAvg').classList.toggle('active', state.priceBase === 'avg');
+    document.getElementById('btnBaseInit').classList.toggle('active', state.priceBase === 'init');
+    const taxBtn = document.getElementById('btnTaxToggle');
+    taxBtn.classList.toggle('active', state.includeTax);
+    taxBtn.textContent = `국내 매도세 0.20% 반영: ${state.includeTax ? 'ON' : 'OFF'}`;
+
+    // Tabs
+    if (!state.stocks.some(s => s.id === state.selectedId)) {
+      state.selectedId = state.stocks[0].id;
+    }
+    const tabsEl = document.getElementById('stockTabs');
+    tabsEl.innerHTML = '';
+    state.stocks.forEach(s => {
+      const btn = document.createElement('button');
+      btn.className = 'tab' + (s.id === state.selectedId ? ' active' : '');
+      btn.textContent = `${s.name || '이름없음'} (${s.weight}%)`;
+      btn.onclick = () => selectTab(s.id);
+      tabsEl.appendChild(btn);
+    });
+
+    const stock = state.stocks.find(s => s.id === state.selectedId);
+    const calc = calcStockState(stock);
+
+    const metaEl = document.getElementById('stockMeta');
+    metaEl.innerHTML = `
+      <div>배정 자금 (초기 / 예비)<strong>${fmt(calc.alloc)}원</strong><span style="font-size:11px;color:var(--sub);">초기 ${fmt(calc.initAmt)}원 · 예비 ${fmt(calc.reserveAmt)}원</span></div>
+      <div>현재 평균 매수가<strong>${calc.entry > 0 ? fmt(calc.avgPrice) + '원' : '매수가 미입력'}</strong><span style="font-size:11px;color:var(--sub);">최초 ${calc.entry > 0 ? fmt(calc.entry) + '원' : '-'} · 잔량 ${calc.remShares.toFixed(1)}주</span></div>
+    `;
+
+    const tbody = document.getElementById('alertBody');
+    tbody.innerHTML = '';
+
+    STEPS.forEach(st => {
+      const sc = calc.stepCalc[st.id];
+      const tr = document.createElement('tr');
+      tr.className = `row-${st.type}` + (sc.done ? ' row-done' : '');
+
+      const tagClass = st.type === 'buy' ? 'tag-buy' : (st.type === 'sell' ? 'tag-sell' : 'tag-hold');
+      let priceCell = '-';
+      if (calc.entry > 0) {
+        if (st.id === 'hold_up') {
+          const p5 = Math.round(calc.sellBasePrice * 1.05);
+          const p15 = Math.round(calc.sellBasePrice * 1.15);
+          priceCell = `<span style="font-size:12px;color:var(--sub);">${fmt(p5)}–${fmt(p15)}원</span>`;
+        } else {
+          priceCell = `<button class="price-btn" onclick="copyText('${sc.price}', '${fmt(sc.price)}원 복사됨')">${fmt(sc.price)}원</button>`;
+        }
+      }
+
+      const amtText = st.type === 'hold'
+        ? `<span style="color:var(--sub);font-size:12px;">${st.desc}</span>`
+        : `<strong>${fmt(sc.amt)}원</strong><div style="font-size:11px;color:var(--sub);">약 ${sc.shares.toFixed(1)}주 · ${st.desc}</div>`;
+
+      const alertCell = st.type === 'hold'
+        ? '<div class="chk-wrap" style="color:#cbd5e1;">—</div>'
+        : `<div class="chk-wrap"><input type="checkbox" ${stock.alerts[st.id] ? 'checked' : ''} onchange="toggleAlert('${stock.id}','${st.id}')" /></div>`;
+
+      const execCell = st.type === 'hold'
+        ? '<div class="chk-wrap" style="color:#cbd5e1;">—</div>'
+        : `<div class="chk-wrap"><input type="checkbox" ${stock.executed[st.id] ? 'checked' : ''} onchange="toggleExecuted('${stock.id}','${st.id}')" /></div>`;
+
+      tr.innerHTML = `
+        <td><span class="tag ${tagClass}">${st.label}</span></td>
+        <td>${priceCell}</td>
+        <td>${amtText}</td>
+        <td>${alertCell}</td>
+        <td>${execCell}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function copyAlerts() {
+    const stock = state.stocks.find(s => s.id === state.selectedId);
+    if (!stock) return;
+    const calc = calcStockState(stock);
+    if (calc.entry <= 0) {
+      showToast('먼저 최초 매수가를 입력해 주세요');
+      return;
+    }
+    const lines = [
+      `[200억 투자법 · ${stock.name} 토스증권 목표가 알림]`,
+      `배정금: ${fmt(calc.alloc)}원 (초기 ${fmt(calc.initAmt)}원 / 예비 ${fmt(calc.reserveAmt)}원)`,
+      `최초 매수가: ${fmt(calc.entry)}원 | 현재 평단: ${fmt(calc.avgPrice)}원`,
+      `기준: ${state.priceBase === 'avg' ? '물타기 후 평균 매수가' : '최초 매수가'} · 남은 잔량 매도`,
+      ''
+    ];
+    STEPS.filter(st => st.type !== 'hold').forEach(st => {
+      const sc = calc.stepCalc[st.id];
+      const mark = sc.done ? '[완료] ' : '';
+      lines.push(`${mark}${st.label}: ${fmt(sc.price)}원 → ${fmt(sc.amt)}원 (약 ${sc.shares.toFixed(1)}주)`);
+    });
+    copyText(lines.join('\n'), `${stock.name} 알림 목록이 복사되었습니다`);
+  }
+
+  function exportData() {
+    copyText(JSON.stringify(state), '전체 기록이 클립보드에 복사되었습니다');
+  }
+
+  function toggleImport() {
+    const box = document.getElementById('importBox');
+    box.style.display = box.style.display === 'block' ? 'none' : 'block';
+  }
+
+  function importData() {
+    const raw = document.getElementById('importText').value.trim();
+    if (!raw) return;
+    try {
+      const parsed = JSON.parse(raw);
+      if (!parsed.stocks || !Array.isArray(parsed.stocks)) throw new Error('invalid');
+      state = Object.assign(defaultState(), parsed);
+      saveState();
+      render();
+      toggleImport();
+      showToast('기록을 성공적으로 불러왔습니다');
+    } catch (e) {
+      showToast('올바른 백업 텍스트가 아닙니다');
+    }
+  }
+
+  function resetAll() {
+    if (!confirm('입력한 종목과 체크 기록을 모두 초기화할까요?')) return;
+    state = defaultState();
+    saveState();
+    render();
+    showToast('초기화되었습니다');
+  }
+
+  function escapeHtml(str) {
+    return String(str || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  document.getElementById('totalBudget').addEventListener('input', e => {
+    state.totalBudget = Math.max(0, parseFloat(e.target.value) || 0);
+    saveState();
+    renderSummaryAndTable();
+  });
+  document.getElementById('initRatio').addEventListener('input', e => {
+    state.initRatio = Math.min(100, Math.max(10, parseFloat(e.target.value) || 65));
+    saveState();
+    renderSummaryAndTable();
+  });
+
+  render();
+</script>
+</body>
+</html>
